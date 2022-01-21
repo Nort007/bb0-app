@@ -1,0 +1,19 @@
+version: '3.3'
+
+services:
+  postgres-db:
+    image: library/postgres:14
+    restart: always
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=appdb
+      - POSTGRES_PORT=5432
+    volumes:
+      - .db_data:/var/lib/postgresql/data
+    networks:
+      - default
+    ports:
+      - '5432:5432'
+volumes:
+  .db_data:

@@ -1,0 +1,65 @@
+version: '3.4'
+
+
+services:
+  postgres:
+    image: library/postgres:14
+    container_name: postgres-db
+    restart: always
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=appdb
+      - POSTGRES_PORT=5432
+    volumes:
+      - $HOME/PycharmProjects/GitHub/.db_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+#    networks:
+#      - default
+
+# --requirepass mypassword
+  redis:
+    image: library/redis:latest
+    container_name: redis-cache
+    restart: always
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - '6379:6379'
+    volumes:
+      - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
+    depends_on:
+      - postgres
+#    networks:
+#      - default
+
+  django-app:
+    restart: always
+    container_name: app-django
+    build:
+      context: .
+    ports:
+      - '8000:8000'
+    command: ['python3', './tapp/manage.py', 'runserver', '0.0.0.0:8000']
+    depends_on:
+      - redis
+#    networks:
+#      - default
+
+  worker:
+    restart: always
+    build:
+      context: .
+    volumes:
+      - $HOME/PycharmProjects/GitHub/.rediska:/app/tapp/rediska
+    command: ['celery', '--workdir=./tapp', '-A', 'tapp', 'worker', '-B', '-l', 'info']
+#    command: sh -c "wait-for django-app:8000 -- celery --workdir=./tapp -A tapp worker -B -l info"
+    depends_on:
+      - django-app
+#    networks:
+#      - default
+
+
+volumes:
+  .db_data:
+  .rediska:
