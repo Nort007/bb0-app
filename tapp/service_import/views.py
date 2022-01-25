@@ -1,4 +1,4 @@
-from . import tasks
+from .tasks import add_sorted_data_through_api, orig_sorted_data, sorted_data
 from . import serializers
 from django.shortcuts import render
 from rest_framework import generics
@@ -8,10 +8,9 @@ from rest_framework.response import Response
 
 
 class OrigSortedTask(APIView):
-    # Run import task
     def get(self, request):
         if request.method == 'GET':
-            tasks.orig_sorted()
+            orig_sorted_data()
         return Response(
             {
                 'status': 200,
@@ -24,7 +23,7 @@ class SortedTask(APIView):
     # Run import task
     def get(self, request):
         if request.method == 'GET':
-            tasks.sorted_data.apply_async()
+            sorted_data.apply_async()
         return Response(
             {
                 'status': 200,
@@ -36,7 +35,7 @@ class SortedTask(APIView):
 class SortedDataThroughApi(APIView):
     def get(self, request):
         if request.method == 'GET':
-            tasks.add_sorted_data_through_api.apply_async()
+            add_sorted_data_through_api.apply_async()
         return Response(
             {
                 'status': 200,
@@ -49,6 +48,11 @@ class SortedDataList(APIView):
     def get(self, request):
         if request.method == 'GET':
             sorted_data = SortedDataModel.objects.all()
-            print(sorted_data)
             serializer = serializers.PreciseDataSerializer(sorted_data, many=True)
-            return Response({"sortedData": serializer.data})
+            print(Response.status_code)
+            return Response(
+                {
+                    "status": Response.status_code,
+                    "sortedData": serializer.data[0]
+                 },
+            )
