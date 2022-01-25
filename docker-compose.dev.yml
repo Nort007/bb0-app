@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: library/postgres:14
+    container_name: postgres-db
+    restart: always
+    volumes:
+      - $HOME/PycharmProjects/GitHub/.db_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  web:
+    restart: always
+    container_name: django-app
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    volumes:
+      - ./tapp:/tapp
+    ports:
+      - '8000:8000'
+    command: "python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - postgres
+
+  worker:
+    restart: always
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    volumes:
+      - ./tapp:/tapp
+      - $HOME/PycharmProjects/GitHub/.rediska:/app/tapp/rediska
+    command: [ 'celery', '-A', 'tapp', 'worker', '-B', '-l', 'info' ]
+    depends_on:
+      - web
+    links:
+      - web
+
+  redis:
+    image: library/redis:latest
+    container_name: redis-cache
+    restart: always
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - '6379:6379'
+    volumes:
+      - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
+    depends_on:
+      - postgres
+
+
+volumes:
+  static_data:
+  .rediska:
