@@ -20,9 +20,30 @@ service_import - приложение, сортирует данные из од
 запустить команду `make`, соберет и запустит контейнеры, добавит фейк-данные в БД
 
 ### Teсты
-
+1. 
 `service_api_aggregatedatamodel` -  все данные в таблице
 
 `service_import_sorteddatamodel` - сортированные данные в таблице
 
 `http://127.0.0.1:8000/{runImportTaskThroughApi/}` - обратиться к апи. Загрузит данные в фоне в другую таблицу
+
+***
+2.
+Запустить тест среду.
+
+В этой среде можно менять код на "лету" и он будет отлаживаться,
+т.к. запускаем сервер через django manage.py.
+
+Если облновлять воркер, то воркер следует перебилдить,
+т.к. он не обновляется.
+```docker
+docker-compose -f docker-compose -f docker-compose.dev.yml up
+```
+
+3.
+Запустить тест deploy версию с движком gunicorn
+```docker
+docker-compose -f docker-compose -f docker-compose.deploy.yml up
+```
+
+P.S. В этом варианте Пока что не работает celery, не проксируется в запросе
