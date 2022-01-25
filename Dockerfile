@@ -1,7 +1,26 @@
 FROM python:latest
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Подгрузить в entrypoint скрипты
+
+COPY ./requirements.txt /requirements.txt
+RUN pip install -r /requirements.txt
+
 RUN apt-get update && apt-get upgrade -y
-WORKDIR /app
-COPY ./requirements.txt ./
-RUN pip install -r requirements.txt
+
+RUN mkdir /tapp
+COPY /tapp /tapp
+WORKDIR /tapp
+
 COPY ./tapp ./tapp
-CMD ['python3', './tapp/manage.py', 'runserver', '0.0.0.0:8000']
+
+COPY ./scripts/ ./scripts/
+
+RUN chmod +x ./scripts/*.sh
+
+RUN mkdir -p /vol/web/static
+RUN chmod -R 755 /vol/web
+
+ENTRYPOINT ["sh", "./scripts/entrypoint.sh"]
