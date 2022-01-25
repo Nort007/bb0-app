@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,9 +26,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-f8kl#4bj)b1=vl#xbn3l3=l$mq!&!fm+=d8na2#v55849n4^oj'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-#  "localhost", "127.0.0.1", "0.0.0.0"
-ALLOWED_HOSTS = ["django-app", "redis", "postgres", "localhost", "127.0.0.1", "0.0.0.0"]
+DEBUG = True
+
+ALLOWED_HOSTS = ["redis", "postgres", "localhost", "127.0.0.1", "0.0.0.0", "web"]
+# allowed_host_env = os.getenv("ALLOWED_HOSTS")
+# if allowed_host_env:
+#     ALLOWED_HOSTS.extend(allowed_host_env.split(','))
 
 
 # Application definition
@@ -87,7 +93,7 @@ DATABASES = {
         'NAME': 'appdb',
         'USER': 'user',
         'PASSWORD': 'password',
-        'HOST': 'postgres',
+        'HOST': str(os.getenv('HOST_DB')),
         'PORT': '5432'
     }
 }
@@ -130,6 +136,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = '/vol/web/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -137,7 +144,7 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # REDIS_HOST = 'redis'  # for docker-compose and 'localhost' for local machine
-REDIS_HOST = 'redis'
+REDIS_HOST = 'redis'  # str(os.getenv('HOST_REDIS'))
 REDIS_PORT = '6379'
 CELERY_BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT  # + '/0'
 CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
