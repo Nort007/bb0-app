@@ -1,14 +1,12 @@
-import time
 import requests
 from celery import shared_task
-from random import randint
 from service_api.models import AggregateDataModel
 from .models import SortedDataModel
 
 
 @shared_task()
 def add_sorted_data_through_api():
-    req = requests.get('http://django-app:8000/aggregateDataList/')
+    req = requests.get('http://web:8000/aggregateDataList/')
     for i in req.json():
         if (float(i['weight']) % 2) != 0:
             b = SortedDataModel(day=i['day'], weight=float(i['weight']))
@@ -26,7 +24,7 @@ def sorted_data():
     return True
 
 
-def orig_sorted():
+def orig_sorted_data():
     obj = AggregateDataModel.objects.all()
     for i in obj:
         if (float(i.weight) % 2) != 0:
